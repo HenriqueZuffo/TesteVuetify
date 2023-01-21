@@ -38,6 +38,17 @@ const routes = [
         component: () => import('@/views/Pessoa.vue')
       }
     ]
+  },
+  {
+    path: '/endereco',
+    component: () => import('@/layouts/default/Default.vue'),
+    children: [
+      {
+        path: '',
+        name: 'endereco',
+        component: () => import('@/layouts/pessoas/Endereco.vue')
+      }
+    ]
   }
 ]
 

@@ -115,10 +115,7 @@
           {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
         ],
 
-        heightTable: '100%'
-
-        
-      
+        heightTable: '100%'      
       }
     },
     methods: {
