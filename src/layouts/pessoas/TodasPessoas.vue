@@ -1,5 +1,7 @@
 <template>
-    <Table :actions="true" :fields="fields" :data="pessoas" :height="height" />
+    <Table :actions="true" :fields="fields" :data="pessoas" :height="height" 
+        :on-edit-click="edit" :on-delete-click="deleteClick" :on-new-record-click="novaPessoa"
+    />
 </template>
 
 <script lang="ts">
@@ -50,6 +52,17 @@
 
         components: {
             Table
+        },
+        methods:{
+            edit(item: any){
+                this.$router.push(`/pessoa/${item.id}`)
+            },
+            deleteClick(item: any){
+                console.log(`Entrou no delete ${item}`)
+            },
+            novaPessoa(){
+                this.$router.push(`/pessoa`)
+            }
         }
     }
 </script>

@@ -1,6 +1,11 @@
 <template>
     <v-form ref="formEndereco" lazy-validation class="ma-8">
         <v-row>
+            <v-col cols="auto">
+                <v-btn @click="voltarClick()" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
+            </v-col>
+        </v-row>
+        <v-row>
             <v-col cols="3">
                 <v-text-field v-model="infoEndereco.id" label="id" readonly/>
             </v-col>
@@ -43,21 +48,25 @@
             </v-col>
 
             <v-col cols="auto">
-                <v-btn class="bg-red" @click="voltar"> Voltar </v-btn>
+                <v-btn class="bg-red" > Excluir </v-btn>
             </v-col>            
         </v-row>
     </v-form>
 </template>
 
 <script lang="ts">
-import router from '@/router';
-
 export default {
     
     props: {
         endereco: Object,
         onSalvarClick: Function,
-        idPessoa: Number
+        idPessoa: Number,
+        voltarClick: {
+            type: Function,
+            default(){
+                this.$router.push(`/pessoa/${this.idPessoa}`)
+            } 
+        } 
     },
     data(){
         return{
@@ -111,11 +120,7 @@ export default {
             if(this.onSalvarClick){
                 this.onSalvarClick(this.infoEndereco);
             }
-        },
-        voltar(){
-            console.log('entrou no voltar')
-            router.push(`/pessoa/${this.idPessoa}`)  
-        }
+        },        
     }
 }
 

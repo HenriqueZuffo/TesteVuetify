@@ -33,6 +33,11 @@ const routes = [
     component: () => import('@/layouts/default/Default.vue'),
     children: [
       {
+        path: '',
+        name: 'novaPessoa',
+        component: () => import('@/views/Pessoa.vue')
+      },
+      {
         path: ':id',
         name: 'Pessoa',
         component: () => import('@/views/Pessoa.vue')

@@ -7,7 +7,12 @@
   <v-window v-model="tab">
     <v-window-item value="pessoa">
       <v-form ref="form" class="ma-8" lazy-validation>
-        
+        <v-row>
+            <v-col cols="auto">
+                <v-btn @click="voltar" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
+            </v-col>
+        </v-row>
+
         <v-row justify="space-between">
           <v-col cols="3">
             <v-text-field v-model="id" label="Id" readonly />
@@ -35,7 +40,6 @@
           
         </v-row>
         
-
         <v-row>
           <v-col cols="auto" class="me-auto">
             <v-btn class="bg-deep-purple" @click="onSaveClick"> Salvar </v-btn>
@@ -50,7 +54,20 @@
     </v-window-item>
 
     <v-window-item value="endereco">
-      <Table :fields="fields" :data="enderecos" :actions="true" :height="heightTable"/>
+      <Table :fields="fields" :data="enderecos" :actions="true" :height="heightTable"
+        :on-delete-click="onDeleteEndereco" :on-new-record-click="onNewRecord" :on-edit-click="onEdit"
+      />
+
+      <v-dialog v-model="dialog">
+        <v-card>
+          <Endereco :id-pessoa="id" :voltar-click="voltarEndereco"
+            :endereco="enderecoSelecionado"
+          />
+        
+        </v-card>
+        
+
+      </v-dialog>
     </v-window-item>
 
   </v-window> 
@@ -58,13 +75,15 @@
 
 <script lang="ts">
   import Table from './Table.vue'
+  import Endereco from './Endereco.vue'
   export default {
     data(){
       return{
         tab: null,
-        id: this.$route.params.id,
+        id: Number(this.$route.params.id),
         select: null,
         valid: false,
+        dialog: false,
         pessoa: {
           nome: '',
           identificacao: '',
@@ -115,21 +134,38 @@
           {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
         ],
 
+        enderecoSelecionado: null,
+
         heightTable: '100%'      
       }
     },
     methods: {
       onSaveClick(){
         this.$refs.form.validate()
-        console.log(`Data: ${!!this.tipoPessoa} `)
       },
-      
       onDeleteClick(){
         console.log(`Ondelete not implemented`)
+      },
+      voltar(){
+        this.$router.push(`/pessoas`)
+      },
+      onEdit(item: any){
+        this.enderecoSelecionado = item
+        this.dialog = true
+      },
+      onNewRecord(){
+        this.dialog = true
+      },
+      onDeleteEndereco(item: any){
+        console.log(`OnDelete Endereço ${item}`)
+      },
+      voltarEndereco(){
+        this.dialog = false
       }
     },
     components:{
-      Table
+      Table,
+      Endereco
     }
   }
 </script>
