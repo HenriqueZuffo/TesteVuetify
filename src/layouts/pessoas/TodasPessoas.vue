@@ -1,5 +1,5 @@
 <template>
-    <Table :actions="true" :fields="fields" :data="pessoas"  />
+    <Table :actions="true" :fields="fields" :data="pessoas" :height="height" />
 </template>
 
 <script lang="ts">
@@ -43,7 +43,9 @@
                 {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
                 {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
             ] 
-            return {fields, pessoas}
+
+            const height = '100%'
+            return {fields, pessoas, height}
         },
 
         components: {

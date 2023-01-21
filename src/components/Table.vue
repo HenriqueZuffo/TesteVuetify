@@ -1,47 +1,46 @@
 <template>
-    <div>
-        <v-table fixed-header>
-            <thead>
-                <tr>
-                    <th v-for="field in fields" key="field.key" class="text-left">
-                        {{ field.title }} 
-                    </th>
-                    <th v-if="actions"></th>
-                    <th v-if="actions"></th>
-                    <th v-if="actions">
-                        <v-btn @click="onNewRecordClick()" class="bg-deep-purple">
-                            <v-icon icon="mdi-plus"/>
-                            Novo                            
-                        </v-btn>  
-                    </th>
-                </tr>
-            </thead>
+    <v-table fixed-header height="{{ height }}">
+        <thead>
+            <tr>
+                <th v-for="field in fields" key="field.key" class="text-left">
+                    {{ field.title }} 
+                </th>
+                <th v-if="actions"></th>
+                <th v-if="actions"></th>
+                <th v-if="actions">
+                    <v-btn @click="onNewRecordClick()" class="bg-deep-purple">
+                        <v-icon icon="mdi-plus"/>
+                        Novo                            
+                    </v-btn>  
+                </th>
+            </tr>
+        </thead>
 
-            <tbody>
-                <tr v-for="item in data" key='item'>
-                    <td v-for="field in fields" key='field'>{{ item[field.key] }}</td>
-                    
-                    <td v-if="actions">
-                        <v-btn @click="onEditClick(item)" class="bg-deep-purple">
-                            <v-icon icon="mdi-eye" />
-                        </v-btn>
-                    </td>
+        <tbody>
+            <tr v-for="item in data" key='item'>
+                <td v-for="field in fields" key='field'>{{ item[field.key] }}</td>
+                
+                <td v-if="actions">
+                    <v-btn @click="onEditClick(item)" class="bg-deep-purple">
+                        <v-icon icon="mdi-eye" />
+                    </v-btn>
+                </td>
 
-                    <td v-if="actions">
-                        <v-btn @click="onEditClick(item)" class="bg-deep-purple">
-                            <v-icon icon="mdi-pencil" />
-                        </v-btn>                        
-                    </td>
+                <td v-if="actions">
+                    <v-btn @click="onEditClick(item)" class="bg-deep-purple">
+                        <v-icon icon="mdi-pencil" />
+                    </v-btn>                        
+                </td>
 
-                    <td v-if="actions">
-                        <v-btn @click="onDeleteClick(item)" class="bg-deep-purple">
-                            <v-icon icon="mdi-delete"/>
-                        </v-btn>
-                    </td>
-                </tr>
-            </tbody>
-        </v-table>
-    </div>
+                <td v-if="actions">
+                    <v-btn @click="onDeleteClick(item)" class="bg-deep-purple">
+                        <v-icon icon="mdi-delete"/>
+                    </v-btn>
+                </td>
+            </tr>
+        </tbody>        
+    </v-table>  
+
 </template>
 
 <script lang="ts">
@@ -80,7 +79,9 @@
                     console.log("OnNewRecordClick not implemented")
                 },
                 required: false
-            }
+            },
+            limit: Number,
+            height: String
         },
         data(){
             return{

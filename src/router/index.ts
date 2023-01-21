@@ -27,6 +27,17 @@ const routes = [
       }
     ]
 
+  },
+  {
+    path: '/pessoa',
+    component: () => import('@/layouts/default/Default.vue'),
+    children: [
+      {
+        path: ':id',
+        name: 'Pessoa',
+        component: () => import('@/views/Pessoa.vue')
+      }
+    ]
   }
 ]
 
