@@ -6,7 +6,8 @@
                     <th v-for="field in fields" key="field.key" class="text-left">
                         {{ field.title }} 
                     </th>
-
+                    <th v-if="actions"></th>
+                    <th v-if="actions"></th>
                     <th v-if="actions">
                         <v-btn @click="onNewRecordClick()" class="bg-deep-purple">
                             <v-icon icon="mdi-plus"/>
