@@ -14,7 +14,7 @@
                 {key: 'identificacao', title: 'Identificação'},
                 {key: 'data_nascimento', title: 'Data de Nascimento'}
             ]
-
+            //Todo: Implementar o carregamento de todas as pessoas do banco
             const pessoas = [
                 {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
                 {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
@@ -58,6 +58,7 @@
                 this.$router.push(`/pessoa/${item.id}`)
             },
             deleteClick(item: any){
+                //Todo: Implementar o delete da pessoa na tela de Todas as Pessoas
                 console.log(`Entrou no delete ${item}`)
             },
             novaPessoa(){

@@ -1,5 +1,5 @@
 <template>
-    <v-form ref="formEndereco" lazy-validation class="ma-8">
+    <v-form ref="formEndereco" class="ma-8" v-model="isValid">
         <v-row>
             <v-col cols="auto">
                 <v-btn @click="voltarClick()" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
@@ -44,11 +44,11 @@
 
         <v-row>
             <v-col cols="auto" class="me-auto">
-                <v-btn class="bg-deep-purple" @click="onSalvar"> Salvar </v-btn>
+                <v-btn class="bg-deep-purple" @click="onSalvar" :disabled="!isValid"> Salvar </v-btn>
             </v-col>
 
             <v-col cols="auto">
-                <v-btn class="bg-red" > Excluir </v-btn>
+                <v-btn class="bg-red" @click="onDelete"> Excluir </v-btn>
             </v-col>            
         </v-row>
     </v-form>
@@ -60,6 +60,7 @@ export default {
     props: {
         endereco: Object,
         onSalvarClick: Function,
+        onDeleteClick: Function,
         idPessoa: Number,
         voltarClick: {
             type: Function,
@@ -70,6 +71,7 @@ export default {
     },
     data(){
         return{
+            isValid: true,
             select: null,
             infoEndereco: {
                 id: null,
@@ -116,12 +118,20 @@ export default {
     },
     methods: {
         onSalvar(){
-            this.$refs.formEndereco.validate()
             if(this.onSalvarClick){
                 this.onSalvarClick(this.infoEndereco);
             }
-        },        
-    }
+        },   
+        onDelete(){
+            if(this.onDeleteClick){
+                this.onDeleteClick(this.infoEndereco)
+            }
+        }    
+    },
+    created(){
+        //Todo: Passar o objeto do props para o infoEndereco
+        console.log(`teste ${!this.endereco}`)
+    },
 }
 
 </script>

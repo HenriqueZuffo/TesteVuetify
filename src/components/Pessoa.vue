@@ -6,7 +6,7 @@
 
   <v-window v-model="tab">
     <v-window-item value="pessoa">
-      <v-form ref="form" class="ma-8" lazy-validation>
+      <v-form ref="form" class="ma-8" v-model="isValid">
         <v-row>
             <v-col cols="auto">
                 <v-btn @click="voltar" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
@@ -42,7 +42,7 @@
         
         <v-row>
           <v-col cols="auto" class="me-auto">
-            <v-btn class="bg-deep-purple" @click="onSaveClick"> Salvar </v-btn>
+            <v-btn class="bg-deep-purple" @click="onSaveClick" :disabled="!isValid"> Salvar </v-btn>
           </v-col>
 
           <v-col cols="auto">
@@ -54,19 +54,17 @@
     </v-window-item>
 
     <v-window-item value="endereco">
-      <Table :fields="fields" :data="enderecos" :actions="true" :height="heightTable"
+      <Table :fields="fieldsEndereco" :data="pessoa.enderecos" :actions="true" :height="heightTable"
         :on-delete-click="onDeleteEndereco" :on-new-record-click="onNewRecord" :on-edit-click="onEdit"
       />
 
       <v-dialog v-model="dialog">
         <v-card>
           <Endereco :id-pessoa="id" :voltar-click="voltarEndereco"
-            :endereco="enderecoSelecionado"
-          />
-        
-        </v-card>
-        
-
+            :endereco="enderecoSelecionado" :on-salvar-click="onSalvarEndereco"
+            :on-delete-click="onDeleteEndereco"
+          />        
+        </v-card>      
       </v-dialog>
     </v-window-item>
 
@@ -79,11 +77,14 @@
   export default {
     data(){
       return{
+        isValid: true,
         tab: null,
-        id: Number(this.$route.params.id),
+        id: Number(this.$route.params.id) || null,
         select: null,
         valid: false,
         dialog: false,
+
+        //Todo: Carregar a pessoa e seus endereços
         pessoa: {
           nome: '',
           identificacao: '',
@@ -91,7 +92,18 @@
             {title: 'Física', value: 1},
             {title: 'Jurídica', value: 2} 
           ],
-          dataNascimento: Date
+          dataNascimento: Date,
+          enderecos: [
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
+          ]
         },
 
         pessoaRules:{
@@ -110,7 +122,7 @@
           ]
         },
 
-        fields: [
+        fieldsEndereco: [
           {key: 'id', title: 'Id'}, 
           {key: 'cep', title: 'CEP'},
           {key: 'logradouro', title: 'Logradouro'},
@@ -120,19 +132,7 @@
           {key: 'cidade', title: 'Cidade'}, 
           {key: 'uf', title: 'UF'}, 
           {key: 'tipo_pessoa', title: 'Tipo'}, 
-        ],
-
-        enderecos: [
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-        ],
+        ],        
 
         enderecoSelecionado: null,
 
@@ -141,9 +141,11 @@
     },
     methods: {
       onSaveClick(){
+        //Todo: Implementar save da Pessoa
         this.$refs.form.validate()
       },
       onDeleteClick(){
+        //Todo: Implementar onDelete da Pessoa
         console.log(`Ondelete not implemented`)
       },
       voltar(){
@@ -157,10 +159,15 @@
         this.dialog = true
       },
       onDeleteEndereco(item: any){
+        //Todo: Implementar onDeleteEndereco
         console.log(`OnDelete Endereço ${item}`)
       },
       voltarEndereco(){
         this.dialog = false
+      },
+      onSalvarEndereco(item: any){
+        //Todo: Implementar Salvar Endereço
+        console.log(`OnSalvar Endereco ${item.id}`)
       }
     },
     components:{
