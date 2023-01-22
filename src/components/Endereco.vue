@@ -2,7 +2,7 @@
     <v-form ref="formEndereco" class="ma-8" v-model="isValid">
         <v-row>
             <v-col cols="auto">
-                <v-btn @click="voltarClick()" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
+                <v-btn @click="onVoltar()" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
             </v-col>
         </v-row>
         <v-row>
@@ -62,12 +62,7 @@ export default {
         onSalvarClick: Function,
         onDeleteClick: Function,
         idPessoa: Number,
-        voltarClick: {
-            type: Function,
-            default(){
-                this.$router.push(`/pessoa/${this.idPessoa}`)
-            } 
-        } 
+        voltarClick: Function
     },
     data(){
         return{
@@ -126,11 +121,23 @@ export default {
             if(this.onDeleteClick){
                 this.onDeleteClick(this.infoEndereco)
             }
-        }    
+        },
+        onVoltar(){
+            if(this.voltarClick){
+                this.voltarClick()
+            }
+        } 
     },
     created(){
-        //Todo: Passar o objeto do props para o infoEndereco
-        console.log(`teste ${!this.endereco}`)
+        if (!this.endereco) return
+        this.infoEndereco = Object.assign(this.infoEndereco, this.endereco)
+        if(this.endereco.tipo == 1){
+            this.select = {title: 'Residencial', value: 1}
+            this.infoEndereco.tipo = 1
+        }else{
+            this.select = {title: 'Comercial', value: 2}
+            this.infoEndereco.tipo = 2
+        }
     },
 }
 

@@ -4,7 +4,7 @@
     <v-tab value="endereco">Endereços</v-tab>
   </v-tabs>
 
-  <v-window v-model="tab">
+  <v-window v-model="tab" v-if="!loading">
     <v-window-item value="pessoa">
       <v-form ref="form" class="ma-8" v-model="isValid">
         <v-row>
@@ -15,11 +15,13 @@
 
         <v-row justify="space-between">
           <v-col cols="3">
-            <v-text-field v-model="id" label="Id" readonly />
+            <v-text-field v-model="pessoa.id" label="Id" readonly />
           </v-col>
 
           <v-col cols="3">
-            <v-text-field v-model="pessoa.dataNascimento" :rules="pessoaRules.dataNascimentoRules" label="Data de Nascimento" type="date" />
+            <v-text-field v-model="pessoa.dataNascimento" :rules="pessoaRules.dataNascimentoRules" 
+              label="Data de Nascimento" type="date"
+            />
           </v-col>
         </v-row>
 
@@ -42,11 +44,11 @@
         
         <v-row>
           <v-col cols="auto" class="me-auto">
-            <v-btn class="bg-deep-purple" @click="onSaveClick" :disabled="!isValid"> Salvar </v-btn>
+            <v-btn class="bg-deep-purple" @click="onSaveClick()" :disabled="!isValid"> Salvar </v-btn>
           </v-col>
 
           <v-col cols="auto">
-            <v-btn class="bg-red" @click="onDeleteClick"> Excluir </v-btn>
+            <v-btn class="bg-red" @click="onDeleteClick()"> Excluir </v-btn>
           </v-col>      
         </v-row>
 
@@ -69,11 +71,23 @@
     </v-window-item>
 
   </v-window> 
+
+  <v-dialog v-else v-model="loading" width="100px">
+        <v-card height="100px" style="justify-content: center; align-items: center;" >
+            <v-progress-circular indeterminate color="deep-purple"/>
+        </v-card>
+  </v-dialog> 
+
+  <v-alert v-if="error" type="error" closable>{{ errorMsg }}</v-alert>
+  <v-alert v-if="success" type="success" closable> {{ successMsg }}</v-alert>
+   
 </template>
 
 <script lang="ts">
   import Table from './Table.vue'
   import Endereco from './Endereco.vue'
+  import { HTTP } from '@/plugins/axios'
+  import  moment  from 'moment'
   export default {
     data(){
       return{
@@ -81,11 +95,16 @@
         tab: null,
         id: Number(this.$route.params.id) || null,
         select: null,
-        valid: false,
         dialog: false,
+        
+        error: false,
+        errorMsg: '',
+        loading: true,
+        success: false,
+        successMsg: '',
 
-        //Todo: Carregar a pessoa e seus endereços
         pessoa: {
+          id: '',
           nome: '',
           identificacao: '',
           tipoPessoa: [
@@ -93,17 +112,7 @@
             {title: 'Jurídica', value: 2} 
           ],
           dataNascimento: Date,
-          enderecos: [
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-            {id: 1, cep: '123456789', logradouro: 'Teste', numero: 1, bairro: 'teste', complemento: '', cidade: 'cidade', uf: 'PR', tipo_pessoa: 1},
-          ]
+          enderecos: null
         },
 
         pessoaRules:{
@@ -141,12 +150,44 @@
     },
     methods: {
       onSaveClick(){
-        //Todo: Implementar save da Pessoa
-        this.$refs.form.validate()
+        if (!this.pessoa.enderecos || this.pessoa.enderecos.length <= 0){
+          this.error = true
+          this.errorMsg = 'É necessário cadastrar ao menos 1 endereço!'
+          return
+        }
+
+        if(this.id){
+          HTTP.put(`pessoa/${this.id}`, this.pessoa)
+            .then(_ => {
+              this.successMsg = 'Pessoa alterada com sucesso'
+              this.success = true
+            })
+            .catch(error => {
+              this.error = true
+              this.errorMsg = error.message
+            })
+        } else {
+          HTTP.post(`pessoa`, this.pessoa)
+            .then(res => {
+              this.successMsg = res.data
+              this.success = true
+            })
+            .catch(error => {
+              this.error = true
+              this.errorMsg = error.message
+            })
+        }
       },
-      onDeleteClick(){
-        //Todo: Implementar onDelete da Pessoa
-        console.log(`Ondelete not implemented`)
+      async onDeleteClick(){
+        await HTTP.delete(`pessoa/${this.id}`)
+          .then(_ => {
+            this.successMsg = `Pessoa ${this.id} excluída com sucesso!`
+            this.success = true
+          })
+          .catch(error => {
+            this.errorMsg = error.message
+            this.error = true
+          })
       },
       voltar(){
         this.$router.push(`/pessoas`)
@@ -166,13 +207,48 @@
         this.dialog = false
       },
       onSalvarEndereco(item: any){
-        //Todo: Implementar Salvar Endereço
+        if(!item.id || item.id <= 0){
+          this.pessoa.enderecos.insert(item)
+        }else{
+          let objIndex = this.pessoas.enderecos.findIndex(obj => obj.id == item.id)
+          console.log(`Antes de alterar? ${this.pessoas.enderecos[0].logradouro}`)
+          this.pessoas.enderecos[objIndex] = item
+          
+        }
         console.log(`OnSalvar Endereco ${item.id}`)
       }
     },
     components:{
       Table,
       Endereco
+    },
+    mounted(){
+      if(!this.id) {
+        this.loading = false
+        return
+      }
+
+      HTTP.get(`pessoa/${this.id}`)
+        .then(res => {
+          this.pessoa = Object.assign(this.pessoa, res.data)
+          if(res.data.tipo == 1){
+            this.pessoa.tipo_pessoa = 1
+            this.select = {title: 'Física', value: 1}
+          }else{
+            this.pessoa.tipo_pessoa = 2
+            this.select = {title: 'Jurídica', value: 2} 
+          }         
+          this.loading = false
+        }, error => {
+          this.loading = false
+          this.error = true
+          this.errorMsg = error.message
+        })
+        .catch(error => {
+          this.loading = false
+          this.error = true
+          this.errorMsg = error.message
+        })
     }
   }
 </script>
