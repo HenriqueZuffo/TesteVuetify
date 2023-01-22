@@ -1,11 +1,22 @@
 <template>
-    <Table :actions="true" :fields="fields" :data="pessoas" :height="height" 
-        :on-edit-click="edit" :on-delete-click="deleteClick" :on-new-record-click="novaPessoa"
-    />
+    <div v-if="!loaded">
+        <Table :actions="true" :fields="fields" :data="pessoas" :height="height" 
+            :on-edit-click="edit" :on-delete-click="deleteClick" :on-new-record-click="novaPessoa"
+        />
+    </div>
+
+    <v-dialog v-else v-model="loaded" width="100px">
+        <v-card height="100px" style="justify-content: center; align-items: center;" >
+            <v-progress-circular indeterminate color="deep-purple"/>
+        </v-card>
+    </v-dialog>   
+  
+    <v-alert v-if="error" type="error" closable>{{ errorMsg }}</v-alert>
 </template>
 
 <script lang="ts">
     import Table from '@/components/Table.vue';
+    import { HTTP } from '@/plugins/axios'
     export default{
         setup(){
             const fields = [
@@ -14,40 +25,16 @@
                 {key: 'identificacao', title: 'Identificação'},
                 {key: 'data_nascimento', title: 'Data de Nascimento'}
             ]
-            //Todo: Implementar o carregamento de todas as pessoas do banco
-            const pessoas = [
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-                {id: 1, nome: 'Teste', identificacao: 1, data_nascimento: '01/01/2002'},
-            ] 
-
             const height = '100%'
-            return {fields, pessoas, height}
+            return {fields, height}
+        },
+        data(){
+            return{
+                pessoas: [],
+                loaded: true,
+                error: false,
+                errorMsg: ''
+            }
         },
 
         components: {
@@ -64,6 +51,26 @@
             novaPessoa(){
                 this.$router.push(`/pessoa`)
             }
+        },
+        mounted(){
+            HTTP.get('pessoa')
+                .then((res) => {
+                    this.pessoas = res.data.map(p => {
+                        let {enderecos, ..._pessoa} = p
+                        return _pessoa
+                    })                    
+                    this.loaded = false                    
+                }, error => {
+                    this.errorMsg = error.message
+                    this.error = true
+                    this.loaded = false
+                    return Promise.reject(error)
+                })
+                .catch(error => {
+                    this.errorMsg = error.message
+                    this.loaded = false
+                    this.error = true
+                })
         }
     }
 </script>
