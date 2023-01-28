@@ -48,7 +48,7 @@
           </v-col>
 
           <v-col cols="auto">
-            <v-btn class="bg-red" @click="onDeleteClick()"> Excluir </v-btn>
+            <v-btn class="bg-red" @click="onDeleteClick()" :disabled="!id || id<= 0"> Excluir </v-btn>
           </v-col>      
         </v-row>
 
@@ -86,8 +86,6 @@
 <script lang="ts">
   import Table from './Table.vue'
   import Endereco from './Endereco.vue'
-  import { HTTP } from '@/plugins/axios'
-  import  moment  from 'moment'
   export default {
     data(){
       return{
@@ -112,7 +110,7 @@
             {title: 'Jurídica', value: 2} 
           ],
           dataNascimento: Date,
-          enderecos: null
+          enderecos: []
         },
 
         pessoaRules:{
@@ -155,67 +153,112 @@
           this.errorMsg = 'É necessário cadastrar ao menos 1 endereço!'
           return
         }
+        
+        let pessoas = this.getAllPessoas()
 
-        if(this.id){
-          HTTP.put(`pessoa/${this.id}`, this.pessoa)
-            .then(_ => {
-              this.successMsg = 'Pessoa alterada com sucesso'
-              this.success = true
-            })
-            .catch(error => {
-              this.error = true
-              this.errorMsg = error.message
-            })
-        } else {
-          HTTP.post(`pessoa`, this.pessoa)
-            .then(res => {
-              this.successMsg = res.data
-              this.success = true
-            })
-            .catch(error => {
-              this.error = true
-              this.errorMsg = error.message
-            })
-        }
+        if(!this.id || this.id <= 0){
+          this.pessoa.id = pessoas.length  + 1;
+          pessoas.push(this.pessoa)
+        }else{
+          let index = pessoas.findIndex(p => p.id == this.id)
+          pessoas[index] = this.pessoa
+        }          
+        
+
+
+        this.salvarPessoa(pessoas)
+        this.successMsg = `Pessoa ${this.pessoa.id} salva com sucesso`
+        this.success = true
+        setTimeout(this.voltar, 3000)
       },
-      async onDeleteClick(){
-        await HTTP.delete(`pessoa/${this.id}`)
-          .then(_ => {
-            this.successMsg = `Pessoa ${this.id} excluída com sucesso!`
-            this.success = true
-          })
-          .catch(error => {
-            this.errorMsg = error.message
-            this.error = true
-          })
+
+      onDeleteClick(){
+        let _pessoas = this.getAllPessoas()
+        _pessoas = _pessoas.filter(pessoa => pessoa.id != this.id)
+        this.salvarPessoa(_pessoas)
+        this.successMsg = `Pessoa ${this.pessoa.id} excluída com sucesso`
+        this.success = true
+        setTimeout(this.voltar, 3000)        
+        this.voltar()
       },
+
       voltar(){
         this.$router.push(`/pessoas`)
       },
+
       onEdit(item: any){
         this.enderecoSelecionado = item
         this.dialog = true
       },
+
       onNewRecord(){
         this.dialog = true
       },
+
       onDeleteEndereco(item: any){
-        //Todo: Implementar onDeleteEndereco
-        console.log(`OnDelete Endereço ${item}`)
+        this.pessoa.endereco.forEach((endereco, index) => {
+          if(endereco.id == item.id) this.pessoa.enderecos.splice(index, 1)
+        })
+
+        if(!this.id || this.id <= 0){
+          return
+        }
+
+        let _pessoa = this.getPessoa(this.id)
+        _pessoa.enderecos = this.pessoa.enderecos
+        
+        this.salvarPessoa(this.editarPessoa(_pessoa))
       },
+
       voltarEndereco(){
         this.dialog = false
       },
+
       onSalvarEndereco(item: any){
-        if(!item.id || item.id <= 0){
-          this.pessoa.enderecos.insert(item)
-        }else{
-          let objIndex = this.pessoas.enderecos.findIndex(obj => obj.id == item.id)
-          console.log(`Antes de alterar? ${this.pessoas.enderecos[0].logradouro}`)
-          this.pessoas.enderecos[objIndex] = item
-          
+        if(!this.id || this.id <= 0){
+          this.pessoa.enderecos.push(item)
+          this.voltarEndereco()
+          return
         }
-        console.log(`OnSalvar Endereco ${item.id}`)
+        
+        item.id_pessoa = this.id;
+
+        let _pessoa = this.getPessoa(this.id)
+
+        if(!item.id || item.id <= 0){
+          item.id = _pessoa.enderecos.length + 1
+          _pessoa.enderecos.push(item)
+        } else {
+          let objIndex = _pessoa.enderecos.findIndex(obj => obj.id == item.id)
+          _pessoa.enderecos[objIndex] = item
+        }
+
+        const pessoaEditada = this.editarPessoa(_pessoa)
+
+        this.salvarPessoa(pessoaEditada) 
+        this.voltarEndereco()           
+      },
+
+      salvarPessoa(pessoas: any){
+        localStorage.setItem('pessoas', JSON.stringify(pessoas))          
+      },
+
+      getPessoa(id: number): any{
+        let _pessoas = this.getAllPessoas()
+        let _pessoa = _pessoas.filter(pessoa => pessoa.id == id)
+        return _pessoa
+      },
+
+      getAllPessoas(): any{
+        return JSON.parse(localStorage.getItem('pessoas')) || []
+      },
+
+      editarPessoa(pessoa): any{
+        let _pessoas = this.getAllPessoas()
+        _pessoas = _pessoas.map(p => {
+          if(p.id == pessoa.id) p = pessoa
+        })
+        return _pessoas
       }
     },
     components:{
@@ -228,27 +271,14 @@
         return
       }
 
-      HTTP.get(`pessoa/${this.id}`)
-        .then(res => {
-          this.pessoa = Object.assign(this.pessoa, res.data)
-          if(res.data.tipo == 1){
-            this.pessoa.tipo_pessoa = 1
-            this.select = {title: 'Física', value: 1}
-          }else{
-            this.pessoa.tipo_pessoa = 2
-            this.select = {title: 'Jurídica', value: 2} 
-          }         
-          this.loading = false
-        }, error => {
-          this.loading = false
-          this.error = true
-          this.errorMsg = error.message
-        })
-        .catch(error => {
-          this.loading = false
-          this.error = true
-          this.errorMsg = error.message
-        })
+      const _pessoas = JSON.parse(localStorage.getItem('pessoas'))
+      this.pessoa = _pessoas.filter(pessoa => pessoa.id == this.id)
+      this.loading = false
+
+      if(!this.pessoa){
+        this.errorMsg = 'Não foi encontrado nenhuma pessoa com esse id!'
+        this.error = true
+      }
     }
   }
 </script>

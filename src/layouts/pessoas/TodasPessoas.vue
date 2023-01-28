@@ -52,43 +52,23 @@
             edit(item: any){
                 this.$router.push(`/pessoa/${item.id}`)
             },
-            async deleteClick(item: any){
-                //Todo: Implementar o delete da pessoa na tela de Todas as Pessoas
-                await HTTP.delete(`pessoa/${item.id}`)
-                    .then(_ => {
-                        this.successMsg = `Pessoa ${item.id} excluída com sucesso!`
-                        this.success = true
-                        this.$router.push(`/pessoas`)
-                    })
-                    .catch(error => {
-                        this.errorMsg = error.message
-                        this.error = true
-                    })
+            deleteClick(item: any){
+                this.pessoas.forEach((pessoa, index) => {
+                    if(pessoa.id == item.id) this.pessoas.splice(index, 1)
+                })
             },
             novaPessoa(){
                 this.$router.push(`/pessoa`)
             }
         },
         mounted(){
-            HTTP.get('pessoa')
-                .then((res) => {
-                    this.pessoas = res.data.map(p => {
-                        let {enderecos, ..._pessoa} = p
-                        _pessoa.tipo = _pessoa.tipo = 1 ? 'Física' : 'Jurídica'
-                        return _pessoa
-                    })                    
-                    this.loading = false                    
-                }, error => {
-                    this.errorMsg = error.message
-                    this.error = true
-                    this.loading = false
-                    return Promise.reject(error)
-                })
-                .catch(error => {
-                    this.errorMsg = error.message
-                    this.loading = false
-                    this.error = true
-                })
+            this.pessoas = JSON.parse(localStorage.getItem('pessoas'))
+            this.loading = false
+            if (!this.pessoas){
+                this.errorMsg = 'Nenhum registro foi encontrado!'
+                this.error = true
+                return
+            }
         }
     }
 </script>
