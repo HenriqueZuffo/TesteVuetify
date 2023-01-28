@@ -36,7 +36,7 @@
           </v-col>       
 
           <v-col cols="4">
-            <v-select v-model="select" :items="pessoa.tipoPessoa" item-title="title" 
+            <v-select v-model="select" :items="tipoPessoa" item-title="title" 
               item-value="value" label="Tipo" single-line :rules="pessoaRules.tipoPessoaRules" />
           </v-col>     
           
@@ -105,13 +105,15 @@
           id: '',
           nome: '',
           identificacao: '',
-          tipoPessoa: [
-            {title: 'Física', value: 1},
-            {title: 'Jurídica', value: 2} 
-          ],
+          tipoPessoa: '',
           dataNascimento: Date,
           enderecos: []
         },
+
+        tipoPessoa: [
+          {title: 'Física', value: 1},
+          {title: 'Jurídica', value: 2} 
+        ],
 
         pessoaRules:{
           nomeRules: [
@@ -138,7 +140,7 @@
           {key: 'complemento', title: 'Complemento'}, 
           {key: 'cidade', title: 'Cidade'}, 
           {key: 'uf', title: 'UF'}, 
-          {key: 'tipo_pessoa', title: 'Tipo'}, 
+          {key: 'tipo', title: 'Tipo'}, 
         ],        
 
         enderecoSelecionado: null,
@@ -153,8 +155,9 @@
           this.errorMsg = 'É necessário cadastrar ao menos 1 endereço!'
           return
         }
-        
+
         let pessoas = this.getAllPessoas()
+        this.pessoa.tipoPessoa = this.select
 
         if(!this.id || this.id <= 0){
           this.pessoa.id = pessoas.length  + 1;
@@ -164,8 +167,6 @@
           pessoas[index] = this.pessoa
         }          
         
-
-
         this.salvarPessoa(pessoas)
         this.successMsg = `Pessoa ${this.pessoa.id} salva com sucesso`
         this.success = true
@@ -192,6 +193,7 @@
       },
 
       onNewRecord(){
+        this.enderecoSelecionado = null
         this.dialog = true
       },
 
@@ -216,6 +218,7 @@
 
       onSalvarEndereco(item: any){
         if(!this.id || this.id <= 0){
+          item.id = this.pessoa.enderecos.length + 1
           this.pessoa.enderecos.push(item)
           this.voltarEndereco()
           return
@@ -245,7 +248,8 @@
 
       getPessoa(id: number): any{
         let _pessoas = this.getAllPessoas()
-        let _pessoa = _pessoas.filter(pessoa => pessoa.id == id)
+        let objIndex = _pessoas.findIndex(obj => obj.id == id)
+        let _pessoa = _pessoas[objIndex]
         return _pessoa
       },
 
@@ -265,14 +269,16 @@
       Table,
       Endereco
     },
+
     mounted(){
       if(!this.id) {
+        console.log('aaaaaaaa')
         this.loading = false
         return
       }
 
-      const _pessoas = JSON.parse(localStorage.getItem('pessoas'))
-      this.pessoa = _pessoas.filter(pessoa => pessoa.id == this.id)
+      this.pessoa = this.getPessoa(this.id)
+      this.select = this.pessoa.tipoPessoa
       this.loading = false
 
       if(!this.pessoa){

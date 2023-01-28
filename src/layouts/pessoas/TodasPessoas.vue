@@ -23,8 +23,8 @@
                 {key: 'id', title: 'Id'}, 
                 {key: 'nome', title: 'Nome'},
                 {key: 'identificacao', title: 'Identificação'},
-                {key: 'data_nascimento', title: 'Data de Nascimento'},
-                {key: 'tipo', title: 'Tipo'}
+                {key: 'dataNascimento', title: 'Data de Nascimento'},
+                {key: 'tipoPessoa', title: 'Tipo'}
             ]
             const height = '100%'
             return {fields, height}
@@ -36,7 +36,7 @@
                         nome: '',
                         identificacao: '',
                         tipoPessoa: '',
-                        dataNascimento: Date,                       
+                        dataNascimento: Date,                     
                     }
                 ],
                 loading: true,
@@ -56,19 +56,26 @@
                 this.pessoas.forEach((pessoa, index) => {
                     if(pessoa.id == item.id) this.pessoas.splice(index, 1)
                 })
+                localStorage.setItem('pessoas', JSON.stringify(this.pessoas))
             },
             novaPessoa(){
                 this.$router.push(`/pessoa`)
             }
         },
         mounted(){
-            this.pessoas = JSON.parse(localStorage.getItem('pessoas'))
+            this.pessoas = []
+            let pessoas = JSON.parse(localStorage.getItem('pessoas')) || []
             this.loading = false
-            if (!this.pessoas){
+            
+            if (pessoas == null|| !pessoas ||pessoas.lenght == 0 || pessoas[0] == null){
+                
                 this.errorMsg = 'Nenhum registro foi encontrado!'
                 this.error = true
                 return
             }
+
+            this.pessoas = pessoas
+                    
         }
     }
 </script>

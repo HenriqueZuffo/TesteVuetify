@@ -5,18 +5,36 @@
                 <v-btn @click="onVoltar()" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
             </v-col>
         </v-row>
-        <v-row>
+        <v-row justify="space-between">
             <v-col cols="3">
                 <v-text-field v-model="infoEndereco.id" label="id" readonly/>
             </v-col>
+                        
+            <v-col cols="3">
+                <v-select v-model="select" :items="tipo" item-title="title" 
+                    item-value="value" label="Tipo" single-line :rules="enderecoRules.tipo"/>
+            </v-col>
+        </v-row>
+        
+        <v-row>
 
             <v-col cols="3">
                 <v-text-field v-model="infoEndereco.cep" label="Cep" :rules="enderecoRules.cep"/>
             </v-col>
 
-            <v-col cols="3">
-                <v-text-field v-model="infoEndereco.logradouro" label="Logradouro" :rules="enderecoRules.logradouro"/>
+            <v-col cols="1">
+                <v-text-field v-model="infoEndereco.uf" label="Uf" :rules="enderecoRules.uf"/>
             </v-col>
+
+            <v-col cols="2">
+                <v-text-field v-model="infoEndereco.cidade" label="Cidade" :rules="enderecoRules.cidade"/> 
+            </v-col>
+
+            <v-col cols="3">
+                <v-text-field v-model="infoEndereco.bairro" label="Bairro" :rules="enderecoRules.bairro"/>
+            </v-col>
+
+
             
             <v-col cols="3">
                 <v-text-field v-model="infoEndereco.numero" type="number" label="Número" :rules="enderecoRules.numero"/>
@@ -24,22 +42,14 @@
         </v-row>
 
         <v-row>
-            <v-col cols="3">
-                <v-text-field v-model="infoEndereco.bairro" label="Bairro" :rules="enderecoRules.bairro"/>
+            <v-col cols="6">
+                <v-text-field v-model="infoEndereco.logradouro" label="Logradouro" :rules="enderecoRules.logradouro"/>
             </v-col>
 
-            <v-col cols="3">
+            <v-col cols="6">
                 <v-text-field v-model="infoEndereco.complemento" label="Complemento" />
             </v-col>
 
-            <v-col cols="3">
-                <v-text-field v-model="infoEndereco.uf" label="Uf" :rules="enderecoRules.uf"/>
-            </v-col>
-            
-            <v-col cols="3">
-                <v-select v-model="select" :items="infoEndereco.tipo" item-title="title" 
-                    item-value="value" label="Tipo" single-line :rules="enderecoRules.tipo"/>
-            </v-col>
         </v-row>
 
         <v-row>
@@ -48,7 +58,7 @@
             </v-col>
 
             <v-col cols="auto">
-                <v-btn class="bg-red" @click="onDelete"> Excluir </v-btn>
+                <v-btn class="bg-red" @click="onDelete" :disabled="!infoEndereco.id || infoEndereco.id <= 0"> Excluir </v-btn>
             </v-col>            
         </v-row>
     </v-form>
@@ -77,11 +87,13 @@ export default {
                 complemento: '',
                 cidade: '',
                 uf: '',
-                tipo: [
-                    {title: 'Residencial', value: 1},
-                    {title: 'Comercial', value: 2} 
-                ],
+                tipo: ''
             },
+
+            tipo: [
+                {title: 'Residencial', value: 1},
+                {title: 'Comercial', value: 2} 
+            ],
             enderecoRules: {
                 cep: [
                     (v: any) => !!v || 'Cep é obrigatório',
@@ -114,6 +126,7 @@ export default {
     methods: {
         onSalvar(){
             if(this.onSalvarClick){
+                this.infoEndereco.tipo = this.select
                 this.onSalvarClick(this.infoEndereco);
             }
         },   
@@ -131,13 +144,7 @@ export default {
     created(){
         if (!this.endereco) return
         this.infoEndereco = Object.assign(this.infoEndereco, this.endereco)
-        if(this.endereco.tipo == 1){
-            this.select = {title: 'Residencial', value: 1}
-            this.infoEndereco.tipo = 1
-        }else{
-            this.select = {title: 'Comercial', value: 2}
-            this.infoEndereco.tipo = 2
-        }
+        this.select = this.endereco.tipo
     },
 }
 
