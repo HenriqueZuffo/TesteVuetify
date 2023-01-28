@@ -161,7 +161,7 @@
         this.pessoa.tipoPessoa = this.select
 
         if(!this.id || this.id <= 0){
-          this.pessoa.id = pessoas.length  + 1;
+          this.pessoa.id = this.gerarId(pessoas);
           pessoas.push(this.pessoa)
         }else{
           let index = pessoas.findIndex(p => p.id == this.id)
@@ -219,8 +219,8 @@
 
       onSalvarEndereco(item: any){
         if(!this.id || this.id <= 0){
-          if(!item.id || item.id <= 0){
-            item.id = this.pessoa.enderecos.length + 1
+          if(!item.id || item.id <= 0){            
+            item.id = this.gerarId(this.pessoa.enderecos)
             this.pessoa.enderecos.push(item)
           } else {
             let index = this.pessoa.enderecos.findIndex(obj => obj.id == item.id)
@@ -236,7 +236,7 @@
         let _pessoa = this.getPessoa(this.id)
 
         if(!item.id || item.id <= 0){
-          item.id = _pessoa.enderecos.length + 1
+          item.id = this.gerarId(_pessoa.enderecos)
           _pessoa.enderecos.push(item)
         } else {
           let objIndex = _pessoa.enderecos.findIndex(obj => obj.id == item.id)
@@ -286,6 +286,10 @@
           this.errorMsg = 'Não foi encontrado nenhuma pessoa com esse id!'
           this.error = true
         }
+      },
+
+      gerarId(item: any){
+        return item.length == 0 ? 1 : item[item.length -1].id + 1
       }
     },
     components:{
