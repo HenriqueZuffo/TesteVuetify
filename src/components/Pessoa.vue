@@ -6,7 +6,7 @@
 
   <v-window v-model="tab" v-if="!loading">
     <v-window-item value="pessoa">
-      <v-form ref="form" class="ma-8" v-model="isValid">
+      <v-form ref="form" class="ma-8">
         <v-row>
             <v-col cols="auto">
                 <v-btn @click="voltar" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
@@ -44,7 +44,7 @@
         
         <v-row>
           <v-col cols="auto" class="me-auto">
-            <v-btn class="bg-deep-purple" @click="onSaveClick()" :disabled="!isValid"> Salvar </v-btn>
+            <v-btn class="bg-deep-purple" @click="onSaveClick()"> Salvar </v-btn>
           </v-col>
 
           <v-col cols="auto">
@@ -89,7 +89,6 @@
   export default {
     data(){
       return{
-        isValid: true,
         tab: null,
         id: Number(this.$route.params.id) || null,
         select: null,
@@ -106,7 +105,7 @@
           nome: '',
           identificacao: '',
           tipoPessoa: '',
-          dataNascimento: Date,
+          dataNascimento: '',
           enderecos: []
         },
 
@@ -149,7 +148,9 @@
       }
     },
     methods: {
-      onSaveClick(){
+      async onSaveClick(){
+        const { valid } = await this.$refs.form.validate()
+        if(!valid) return
         if (!this.pessoa.enderecos || this.pessoa.enderecos.length <= 0){
           this.error = true
           this.errorMsg = 'É necessário cadastrar ao menos 1 endereço!'
@@ -175,9 +176,10 @@
 
       onDeleteClick(){
         let _pessoas = this.getAllPessoas()
-        _pessoas = _pessoas.filter(pessoa => pessoa.id != this.id)
+        let index = _pessoas.findIndex(p => p.id == this.id)
+        _pessoas.splice(index, 1)
         this.salvarPessoa(_pessoas)
-        this.successMsg = `Pessoa ${this.pessoa.id} excluída com sucesso`
+        this.successMsg = `Pessoa excluída com sucesso`
         this.success = true
         setTimeout(this.voltar, 3000)        
         this.voltar()
@@ -198,10 +200,9 @@
       },
 
       onDeleteEndereco(item: any){
-        this.pessoa.endereco.forEach((endereco, index) => {
-          if(endereco.id == item.id) this.pessoa.enderecos.splice(index, 1)
-        })
-
+        let index = this.pessoa.enderecos.findIndex(e => e.id == item.id)
+        this.pessoa.enderecos.splice(index, 1)
+        
         if(!this.id || this.id <= 0){
           return
         }
@@ -218,8 +219,14 @@
 
       onSalvarEndereco(item: any){
         if(!this.id || this.id <= 0){
-          item.id = this.pessoa.enderecos.length + 1
-          this.pessoa.enderecos.push(item)
+          if(!item.id || item.id <= 0){
+            item.id = this.pessoa.enderecos.length + 1
+            this.pessoa.enderecos.push(item)
+          } else {
+            let index = this.pessoa.enderecos.findIndex(obj => obj.id == item.id)
+            this.pessoa.enderecos[index] = item
+          }
+          
           this.voltarEndereco()
           return
         }
@@ -239,7 +246,8 @@
         const pessoaEditada = this.editarPessoa(_pessoa)
 
         this.salvarPessoa(pessoaEditada) 
-        this.voltarEndereco()           
+        this.voltarEndereco() 
+        this.carregaPessoa()          
       },
 
       salvarPessoa(pessoas: any){
@@ -259,10 +267,25 @@
 
       editarPessoa(pessoa): any{
         let _pessoas = this.getAllPessoas()
-        _pessoas = _pessoas.map(p => {
-          if(p.id == pessoa.id) p = pessoa
-        })
+        let index = _pessoas.findIndex(obj => obj.id == pessoa.id)
+        _pessoas[index] = pessoa
         return _pessoas
+      },
+
+      carregaPessoa(){
+        if(!this.id) {
+          this.loading = false
+          return
+        }
+
+        this.pessoa = this.getPessoa(this.id)
+        this.select = this.pessoa.tipoPessoa
+        this.loading = false
+
+        if(!this.pessoa){
+          this.errorMsg = 'Não foi encontrado nenhuma pessoa com esse id!'
+          this.error = true
+        }
       }
     },
     components:{
@@ -271,20 +294,7 @@
     },
 
     mounted(){
-      if(!this.id) {
-        console.log('aaaaaaaa')
-        this.loading = false
-        return
-      }
-
-      this.pessoa = this.getPessoa(this.id)
-      this.select = this.pessoa.tipoPessoa
-      this.loading = false
-
-      if(!this.pessoa){
-        this.errorMsg = 'Não foi encontrado nenhuma pessoa com esse id!'
-        this.error = true
-      }
+      this.carregaPessoa()
     }
   }
 </script>

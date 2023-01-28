@@ -1,5 +1,5 @@
 <template>
-    <v-form ref="formEndereco" class="ma-8" v-model="isValid">
+    <v-form ref="form" class="ma-8">
         <v-row>
             <v-col cols="auto">
                 <v-btn @click="onVoltar()" class="bg-deep-purple"> <v-icon icon="mdi-arrow-left-thin" /> </v-btn>
@@ -54,7 +54,7 @@
 
         <v-row>
             <v-col cols="auto" class="me-auto">
-                <v-btn class="bg-deep-purple" @click="onSalvar" :disabled="!isValid"> Salvar </v-btn>
+                <v-btn class="bg-deep-purple" @click="onSalvar"> Salvar </v-btn>
             </v-col>
 
             <v-col cols="auto">
@@ -76,7 +76,6 @@ export default {
     },
     data(){
         return{
-            isValid: true,
             select: null,
             infoEndereco: {
                 id: null,
@@ -124,8 +123,10 @@ export default {
         
     },
     methods: {
-        onSalvar(){
-            if(this.onSalvarClick){
+        async onSalvar(){
+            const { valid } = await this.$refs.form.validate()
+
+            if(this.onSalvarClick && valid){
                 this.infoEndereco.tipo = this.select
                 this.onSalvarClick(this.infoEndereco);
             }
